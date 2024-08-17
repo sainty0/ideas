@@ -12,7 +12,13 @@ class ImageGenerator():
         self.n = 1
 
 
-    def make_image(self, prompt):
+    def make_prompt(self, text):
+        prompt = "Can you create an image for a story board using the Scene described here: " + text
+        return prompt
+
+
+    def make_image(self, text):
+        prompt = self.make_prompt(text)
         response = openai.Image.create(
             prompt=prompt,
             n=self.n,
