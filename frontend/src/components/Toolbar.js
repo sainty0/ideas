@@ -1,35 +1,26 @@
 import React from 'react';
 
-const Toolbar = ({ editor }) => {
-  if (!editor) {
-    return null;
-  }
+export default function Toolbar({ editor, setBlockType }) {
+    if(!editor){
+        console.log("editor off");
+        return null;
+    }
 
-  return (
-    <div className="editor-toolbar">
-      <button
-        onClick={() => editor.chain().focus().setNode('sceneHeading').run()}
-      >
-        Scene Heading
-      </button>
-      <button
-        onClick={() => editor.chain().focus().setNode('actionBlock').run()}
-      >
-        Action Block
-      </button>
-      <button
-        onClick={() => editor.chain().focus().setNode('characterName').run()}
-      >
-        Character Name
-      </button>
-      <button
-        onClick={() => editor.chain().focus().setNode('dialogue').run()}
-      >
-        Dialogue
-      </button>
-    </div>
-  );
-};
 
-export default Toolbar;
+    function toggleBlockNode(type) {
+        console.log('here');
+        setBlockType(type);
+        editor.chain().focus().setNode(type).run();
+    }
+
+    return (
+        <div className="toolbar">
+            <button onClick={() => toggleBlockNode('actionBlock')}>Action Block</button>
+            <button onClick={() => toggleBlockNode('characterName')}>Character Name</button>
+            <button onClick={() => toggleBlockNode('dialogue')}>Dialogue</button>
+            <button onClick={() => toggleBlockNode('sceneHeading')}>Scene Heading</button>
+        </div>
+    );
+}
+
 

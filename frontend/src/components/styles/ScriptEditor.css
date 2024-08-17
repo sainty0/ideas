@@ -1,0 +1,84 @@
+.page {
+  width: 21cm;
+  height: 29.7cm;
+  margin: 1cm auto;
+  padding: 1cm;
+  background: white;
+  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.2); /* Adds a subtle shadow to mimic paper */
+  border: 1px solid #ddd;
+  overflow: hidden; /* Ensures content is contained within each page */
+  page-break-after: always; /* Forces a break after each page */
+}
+
+/* Styling the content inside the editor */
+.EditorContent {
+  font-family: 'Courier', monospace; /* Common font for screenwriting */
+  font-size: 12pt;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* Ensures that the page does not break inappropriately */
+.page:after {
+  content: "";
+  display: block;
+  page-break-after: always;
+}
+
+/* Toolbar styles */
+.toolbar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.toolbar button {
+  padding: 0.5rem 1rem;
+  margin: 0 0.5rem;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.toolbar button:hover {
+  background-color: #ddd;
+}
+
+/* Scene Heading - Typically all caps */
+.scene-heading {
+  font-family: 'Courier', monospace;
+  font-size: 12pt;
+  line-height: 1.5;
+  text-align: left;
+  text-transform: uppercase;
+  margin: 20px 0;
+}
+
+/* Character Name - Typically centered and all caps */
+.character-name {
+  font-family: 'Courier', monospace;
+  font-size: 12pt;
+  line-height: 1.5;
+  text-align: center;
+  text-transform: uppercase;
+  margin: 20px 0;
+}
+
+/* Dialogue - Typically centered or indented */
+.dialogue {
+  font-family: 'Courier', monospace;
+  font-size: 12pt;
+  line-height: 1.5;
+  margin-left: 3cm;
+  margin-right: 3cm;
+  margin-bottom: 20px;
+}
+
+/* Action Block - Typically left-aligned and written in normal sentence case */
+.action-block {
+  font-family: 'Courier', monospace;
+  font-size: 12pt;
+  line-height: 1.5;
+  text-align: left;
+  margin: 10px 0;
+}
