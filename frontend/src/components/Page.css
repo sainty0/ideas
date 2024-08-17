@@ -1,0 +1,13 @@
+.page {
+  width: 210mm;
+  height: 297mm;
+  margin: 10mm auto;
+  padding: 20mm;
+  background: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  page-break-after: always; /* Ensures each page breaks after content is filled */
+  overflow: hidden; /* Prevents overflow of content onto next page */
+  position: relative;
+  box-sizing: border-box;
+}
+
