@@ -32,11 +32,4 @@ class ImageGenerator():
 
     def mock_openai_image_create(self, prompt):
         
-        img = Image.new('RGB', (512, 512), color = (73, 109, 137))
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode()
-
-        return {
-            'data': [{'url': 'data:image/png;base64,' + img_str}]
-        }
+        return "https://i.pinimg.com/564x/ed/6f/c2/ed6fc28d25da28c73e45ed762a26bbd3.jpg"
