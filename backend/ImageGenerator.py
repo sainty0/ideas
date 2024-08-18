@@ -12,15 +12,21 @@ class ImageGenerator():
         self.n = 1
 
 
-    def delete_every_second_line(self, content):
-        lines = content.splitlines()
-        filtered_lines = [line for i, line in enumerate(lines) if i % 2 == 0]
-        return '\n'.join(filtered_lines)
+    def deconstruct_all(self, content):
+        paragraph = ''
+        for dictionary in content:
+            try: 
+                paragraph += dictionary['content']['text']
+            except:
+                pass
+
+                                
+        return paragraph
 
     def make_prompt(self, text):
         content = text['content']
-        out = self.delete_every_second_line(content)
-        prompt = "Can you create an image for a story board using the Scene described here: " + out
+        create_word = self.deconstruct_all(content)
+        prompt = "Can you create an image for a story board using the Scene described here: " + create_word
         return prompt
 
 
