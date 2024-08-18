@@ -73,8 +73,8 @@ p {
 .editor-container {
       flex: 1;
     overflow-y: auto;
-    width: 210mm; /* A4 page width */
-    height: 297mm; /* A4 page height */
+    width: 210mm;
+    height: 297mm;
     background: linear-gradient(145deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.2));
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     padding: 40px;
