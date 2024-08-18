@@ -7,8 +7,6 @@ import { dropCursor } from 'prosemirror-dropcursor';
 import { history } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
 import { undo, redo } from 'prosemirror-history';
-import GenerateImage from './nodes/GenerateImage';
-
 import { baseKeymap, splitBlock } from 'prosemirror-commands';
 import './styles/ScriptEditor.css';
 import Toolbar from './Toolbar';
@@ -38,14 +36,13 @@ const mySchema = new Schema({
 });
 
 export default function ScriptEditor() {
-    const [blockType, setBlockType] = useState('actionBlock');
-    const [scenes, setScenes] = useState([]);
-    const contentRef = useRef(null);
-    const [prompt, setPrompt] = useState('');
+  const editorRef = useRef(null);
+  const [blockType, setBlockType] = useState('actionBlock');
+  const viewRef = useRef(null);
   const [imageUrl, setImageUrl] = useState('');
   const [error, setError] = useState('');
 
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
 
         try {
         const response = await fetch('http://localhost:5000/generate-image', {
@@ -71,71 +68,6 @@ export default function ScriptEditor() {
         setImageUrl('');
         }
     };
-
-    const editor = useEditor({
-        extensions: [
-            StarterKit,
-            Bold,
-            Italic,
-            ActionBlock,
-            CharacterName,
-            Dialogue,
-            SceneHeading
-        ],
-        content: '<actionBlock>Start typing your script...</actionBlock>',
-        onUpdate: ({ editor }) => {
-            updateScenes(editor);
-        },
-    });
-
-    const updateScenes = (editor) => {
-        if (!editor) return;
-
-        const newScenes = [];
-        let currentScene = { id: `scene-${Date.now()}`, content: '' };
-
-        editor.state.doc.descendants((node, pos) => {
-            if (node.type.name === 'sceneHeading') {
-                if (currentScene.content) {
-                    newScenes.push(currentScene);
-                }
-                currentScene = { id: `scene-${Date.now()}-${pos}`, content: '' };
-            }
-            currentScene.content += node.textContent + '\n';
-        });
-
-        if (currentScene.content) {
-            newScenes.push(currentScene);
-        }
-
-        setScenes(newScenes);
-    };
-
-    useEffect(() => {
-        if (editor) {
-            const handleSelectionUpdate = () => {
-                const { $from } = editor.state.selection;
-                const blockType = $from.parent.type.name;
-                setBlockType(blockType);
-            };
-
-            editor.on('selectionUpdate', handleSelectionUpdate);
-            return () => {
-                editor.off('selectionUpdate', handleSelectionUpdate);
-            };
-        }
-    }, [editor]);
-
-        const onDragEnd = (result) => {
-            if (result.destination) {
-                setPrompt(scenes[result.destination.index]);
-                handleSubmit();
-            };
-            
-    };
-  const editorRef = useRef(null);
-  const [blockType, setBlockType] = useState('actionBlock');
-  const viewRef = useRef(null);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -251,39 +183,6 @@ export default function ScriptEditor() {
     return $pos.after();
   };
 
-        return (
-        <div>
-            <Toolbar editor={editor} setBlockType={setBlockType} blockType={blockType} />
-            <div className="editor-container">
-                <EditorContent editor={editor} />
-            </div>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {imageUrl && <img src={imageUrl} alt="Generated" />}
-            <DragDropContext onDragEnd={onDragEnd}>
-                <Droppable droppableId="scenes">
-                    {(provided) => (
-                        <div {...provided.droppableProps} ref={provided.innerRef} className="scenes-list">
-                            {scenes.map((scene, index) => (
-                                <Draggable key={scene.id} draggableId={scene.id} index={index}>
-                                    {(provided) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            className="scene-item"
-                                        >
-                                            {scene.content.split('\n')[0]}
-                                        </div>
-                                    )}
-                                </Draggable>
-                            ))}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
-            </DragDropContext>
-        </div>
-    );
   return (
     <div>
       <Toolbar toggleBlockType={toggleBlockType} currentBlockType={blockType} />
