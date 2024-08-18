@@ -1,276 +1,164 @@
-// import React, { useEffect, useRef, useState } from 'react';
-// import { useEditor, EditorContent } from '@tiptap/react';
-// import StarterKit from '@tiptap/starter-kit';
-// import Bold from '@tiptap/extension-bold';
-// import Italic from '@tiptap/extension-italic';
-// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-//
-// import ActionBlock from './nodes/ActionBlock';
-// import CharacterName from './nodes/CharacterName';
-// import Dialogue from './nodes/Dialogue';
-// import SceneHeading from './nodes/SceneHeading';
-// import Scenes from './nodes/Scenes';
-// import Toolbar from './Toolbar';
-// import './styles/ScriptEditor.css';
-//
-// export default function ScriptEditor() {
-//     const [blockType, setBlockType] = useState('actionBlock');
-//
-//     const editor = useEditor({
-//         extensions: [
-//             StarterKit,
-//             Bold,
-//             Italic,
-//             ActionBlock,
-//             CharacterName,
-//             Dialogue,
-//             SceneHeading,
-//         ],
-//         content: '<actionBlock>Start typing your script...</actionBlock>',
-//     });
-//
-//     const contentRef = useRef(null);
-//     const [pages, setPages] = useState([{}]);
-//     const [scenes, setScenes] = useState([]);
-//
-//     useEffect(() => {
-//         if (editor && contentRef.current) {
-//             const handleSplit = () => {
-//                 const contentElement = contentRef.current;
-//                 const contentHeight = contentElement.scrollHeight;
-//
-//                 const maxPageHeight = 29.7 * 37.8;
-//                 const pageCount = Math.ceil(contentHeight / maxPageHeight);
-//
-//                 setPages(Array(pageCount).fill({}));
-//             };
-//
-//             editor.on('update', handleSplit);
-//             window.addEventListener('resize', handleSplit);
-//
-//             return () => {
-//                 window.removeEventListener('resize', handleSplit);
-//                 editor.off('update', handleSplit);
-//             };
-//         }
-//     }, [editor]);
-//
-//     useEffect(() => {
-//         if (editor) {
-//             const insertBlock = () => {
-//                 switch (blockType) {
-//                     case 'actionBlock':
-//                         editor.chain().focus().setNode('actionBlock').run();
-//                         break;
-//                     case 'characterName':
-//                         editor.chain().focus().setNode('characterName').run();
-//                         break;
-//                     case 'dialogue':
-//                         editor.chain().focus().setNode('dialogue').run();
-//                         break;
-//                     case 'sceneHeading':
-//                         editor.chain().focus().setNode('sceneHeading').run();
-//                         break;
-//                     default:
-//                         editor.chain().focus().setNode('actionBlock').run();
-//                         break;
-//                 }
-//             };
-//
-//             editor.view.dom.addEventListener('keydown', (event) => {
-//                 if (event.key === 'Enter') {
-//                     event.preventDefault();
-//                     insertBlock();
-//                 }
-//             });
-//
-//             return () => {
-//                 editor.view.dom.removeEventListener('keydown', insertBlock);
-//             };
-//         }
-//     }, [editor, blockType]);
-//
-//     useEffect(() => {
-//         if (editor) {
-//             const handleSelectionUpdate = () => {
-//                 const { $from } = editor.state.selection;
-//                 const blockType = $from.node().type.name;
-//                 setBlockType(blockType);
-//             };
-//
-//             editor.on('selectionUpdate', handleSelectionUpdate);
-//
-//             return () => {
-//                 editor.off('selectionUpdate', handleSelectionUpdate);
-//             };
-//         }
-//     }, [editor]);
-//
-//
-//     useEffect(() => {
-//         if (editor) {
-//             const updateScenes = () => {
-//                 const newScenes = editor.state.doc.content.content
-//                 .filter(node => node.type.name === 'scene')
-//                 .map((node, index) => ({
-//                     id: `scene-${index}`,
-//                     content: node.textContent,
-//                 }));
-//                 setScenes(newScenes);
-//             };
-//
-//             editor.on('update', updateScenes);
-//             return () => editor.off('update', updateScenes);
-//         }
-//     }, [editor]);
-//
-//     const onDragEnd = (result) => {
-//         // Handle drag end
-//         console.log(result);
-//     };
-//     return (
-//         <DragDropContext onDragEnd={onDragEnd}>
-//             <div>
-//                 <Toolbar editor={editor} setBlockType={setBlockType} blockType={blockType} />
-//                 <Droppable droppableId="script">
-//                     {(provided) => (
-//                         <div {...provided.droppableProps} ref={provided.innerRef}>
-//                             {scenes.map((scene, index) => (
-//                                 <Draggable key={scene.id} draggableId={scene.id} index={index}>
-//                                     {(provided) => (
-//                                         <div
-//                                             ref={provided.innerRef}
-//                                             {...provided.draggableProps}
-//                                             {...provided.dragHandleProps}
-//                                         >
-//                                             <EditorContent editor={editor} />
-//                                         </div>
-//                                     )}
-//                                 </Draggable>
-//                             ))}
-//                             {provided.placeholder}
-//                         </div>
-//                     )}
-//                 </Droppable>
-//             </div>
-//         </DragDropContext>
-//     );
-// }
-//
 import React, { useEffect, useRef, useState } from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Bold from '@tiptap/extension-bold';
-import Italic from '@tiptap/extension-italic';
-import ActionBlock from './nodes/ActionBlock';
-import CharacterName from './nodes/CharacterName';
-import Dialogue from './nodes/Dialogue';
-import SceneHeading from './nodes/SceneHeading';
-import Toolbar from './Toolbar';
+import { EditorState, Plugin } from 'prosemirror-state';
+import { EditorView } from 'prosemirror-view';
+import { Schema, DOMParser } from 'prosemirror-model';
+import { schema as basicSchema } from 'prosemirror-schema-basic';
+import { dropCursor } from 'prosemirror-dropcursor';
+import { history } from 'prosemirror-history';
+import { keymap } from 'prosemirror-keymap';
+import { undo, redo } from 'prosemirror-history';
+import { baseKeymap, splitBlock } from 'prosemirror-commands';
 import './styles/ScriptEditor.css';
+import Toolbar from './Toolbar';
+
+const mySchema = new Schema({
+  nodes: basicSchema.spec.nodes.append({
+    sceneHeading: {
+      content: "text*",
+      group: "block",
+      toDOM() { return ["h1", { class: "scene-heading", draggable: "true" }, 0]; },
+      parseDOM: [{ tag: "h1.scene-heading" }]
+    },
+    actionBlock: {
+      content: "text*",
+      group: "block",
+      toDOM() { return ["p", { class: "action-block" }, 0]; },
+      parseDOM: [{ tag: "p.action-block" }]
+    },
+    dialogue: {
+      content: "text*",
+      group: "block",
+      toDOM() { return ["p", { class: "dialogue" }, 0]; },
+      parseDOM: [{ tag: "p.dialogue" }]
+    }
+  }),
+  marks: basicSchema.spec.marks
+});
 
 export default function ScriptEditor() {
-    const [blockType, setBlockType] = useState('actionBlock');
-    const [scenes, setScenes] = useState([]);
-    const contentRef = useRef(null);
+  const editorRef = useRef(null);
+  const [blockType, setBlockType] = useState('actionBlock');
+  const viewRef = useRef(null);
 
-    const editor = useEditor({
-        extensions: [
-            StarterKit,
-            Bold,
-            Italic,
-            ActionBlock,
-            CharacterName,
-            Dialogue,
-            SceneHeading,
-        ],
-        content: '<actionBlock>Start typing your script...</actionBlock>',
-        onUpdate: ({ editor }) => {
-            updateScenes(editor);
-        },
-    });
-
-    const updateScenes = (editor) => {
-        if (!editor) return;
-
-        const newScenes = [];
-        let currentScene = { id: `scene-${Date.now()}`, content: '' };
-
-        editor.state.doc.descendants((node, pos) => {
-            if (node.type.name === 'sceneHeading') {
-                if (currentScene.content) {
-                    newScenes.push(currentScene);
+  useEffect(() => {
+    if (editorRef.current) {
+      const state = EditorState.create({
+        schema: mySchema,
+        plugins: [
+          dropCursor(),
+          history(),
+          keymap({
+            'Mod-z': undo,
+            'Mod-y': redo,
+            'Enter': splitBlock,
+            ...baseKeymap
+          }),
+          new Plugin({
+            props: {
+              handleDOMEvents: {
+                selectionchange: (_, view) => {
+                  const { $from } = view.state.selection;
+                  setBlockType($from.parent.type.name);
+                },
+                dragstart: (view, event) => {
+                  handleDragStart(view, event);
+                },
+                drop: (view, event) => {
+                  handleDrop(view, event);
+                },
+                mousedown: (view, event) => {
+                  const isDraggable = event.target.closest('.scene-heading');
+                  if (isDraggable) {
+                    // Prevent ProseMirror from handling the event (i.e., placing the cursor in text)
+                    event.preventDefault();
+                  }
                 }
-                currentScene = { id: `scene-${Date.now()}-${pos}`, content: '' };
+              }
             }
-            currentScene.content += node.textContent + '\n';
-        });
+          })
+        ]
+      });
 
-        if (currentScene.content) {
-            newScenes.push(currentScene);
+      const view = new EditorView(editorRef.current, {
+        state,
+        dispatchTransaction(transaction) {
+          const newState = view.state.apply(transaction);
+          view.updateState(newState);
         }
+      });
 
-        setScenes(newScenes);
-    };
+      viewRef.current = view;
 
-    useEffect(() => {
-        if (editor) {
-            const handleSelectionUpdate = () => {
-                const { $from } = editor.state.selection;
-                const blockType = $from.parent.type.name;
-                setBlockType(blockType);
-            };
+      return () => {
+        view.destroy();
+      };
+    }
+  }, []);
 
-            editor.on('selectionUpdate', handleSelectionUpdate);
-            return () => {
-                editor.off('selectionUpdate', handleSelectionUpdate);
-            };
-        }
-    }, [editor]);
+  const toggleBlockType = (type) => {
+    const { state, dispatch } = viewRef.current;
+    const { $from, $to } = state.selection;
 
-        const onDragEnd = (result) => {
-        if (!result.destination) {
-            return;
-        }
+    const applicableNode = state.schema.nodes[type];
+    if (!applicableNode) return;
 
-        const items = Array.from(scenes);
-        const [reorderedItem] = items.splice(result.source.index, 1);
-        items.splice(result.destination.index, 0, reorderedItem);
-
-        setScenes(items);
-    };
-
-        return (
-        <div>
-            <Toolbar editor={editor} setBlockType={setBlockType} blockType={blockType} />
-            <div className="editor-container">
-                <EditorContent editor={editor} />
-            </div>
-            <DragDropContext onDragEnd={onDragEnd}>
-                <Droppable droppableId="scenes">
-                    {(provided) => (
-                        <div {...provided.droppableProps} ref={provided.innerRef} className="scenes-list">
-                            {scenes.map((scene, index) => (
-                                <Draggable key={scene.id} draggableId={scene.id} index={index}>
-                                    {(provided) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            className="scene-item"
-                                        >
-                                            {scene.content.split('\n')[0]}
-                                        </div>
-                                    )}
-                                </Draggable>
-                            ))}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
-            </DragDropContext>
-        </div>
+    // Check if the selection is a block and toggle the node type
+    dispatch(
+      state.tr.setBlockType($from.pos, $to.pos, applicableNode)
     );
+  };
+
+  const handleDragStart = (view, event) => {
+    const { state } = view;
+    const { selection } = state;
+
+    const sceneStart = findSceneStart(state, selection.from);
+    const sceneEnd = findSceneEnd(state, sceneStart);
+
+    const sceneContent = state.doc.slice(sceneStart, sceneEnd).content;
+    event.dataTransfer.setData("text/plain", JSON.stringify(sceneContent.toJSON()));
+    event.dataTransfer.effectAllowed = "move";
+
+    view.dragging = { start: sceneStart, end: sceneEnd };
+  };
+
+  const handleDrop = (view, event) => {
+    event.preventDefault();
+    const { state, dragging } = view;
+    if (!dragging) return;
+
+    const dropPos = view.posAtCoords({ left: event.clientX, top: event.clientY }).pos;
+
+    const sceneContent = JSON.parse(event.dataTransfer.getData("text/plain"));
+    const sceneSlice = state.schema.nodeFromJSON(sceneContent);
+
+    const tr = state.tr.delete(dragging.start, dragging.end).insert(dropPos, sceneSlice);
+    view.dispatch(tr);
+
+    view.dragging = null;
+  };
+
+  const findSceneStart = (state, pos) => {
+    let $pos = state.doc.resolve(pos);
+    while ($pos.nodeBefore && $pos.nodeBefore.type.name !== 'sceneHeading') {
+      $pos = state.doc.resolve($pos.before());
+    }
+    return $pos.before();
+  };
+
+  const findSceneEnd = (state, pos) => {
+    let $pos = state.doc.resolve(pos);
+    while ($pos.nodeAfter && $pos.nodeAfter.type.name !== 'sceneHeading') {
+      $pos = state.doc.resolve($pos.after());
+    }
+    return $pos.after();
+  };
+
+  return (
+    <div>
+      <Toolbar toggleBlockType={toggleBlockType} currentBlockType={blockType} />
+      <div className="editor-container" ref={editorRef}></div>
+    </div>
+  );
 }
 
