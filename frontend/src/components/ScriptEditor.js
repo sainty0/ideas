@@ -222,7 +222,7 @@ export default function ScriptEditor({ toggleBlockType }) {
                 />
                 <div className="editor-container" ref={editorRef}></div>
             </div>
-            <SceneList scenes={scenes} onDragEnd={handleDragEnd} />
+            <SceneList scenes={scenes} onDragEnd={handleDragEnd} imageUrls={imageUrls} />
         </div>
     );    
 }

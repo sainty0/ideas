@@ -1,7 +1,7 @@
 
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
-function SceneList({ scenes, onDragEnd }) {
+function SceneList({ scenes, onDragEnd, imageUrls }) {
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="scenes">
@@ -21,6 +21,7 @@ function SceneList({ scenes, onDragEnd }) {
                                                 }}
                                     >
                                         Scene {index + 1}
+                                        {imageUrls[index] && <img src={imageUrls[index]} alt="Generated" />}
                                     </div>
                                 )}
                             </Draggable>
