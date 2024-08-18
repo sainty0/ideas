@@ -167,6 +167,8 @@ import ActionBlock from './nodes/ActionBlock';
 import CharacterName from './nodes/CharacterName';
 import Dialogue from './nodes/Dialogue';
 import SceneHeading from './nodes/SceneHeading';
+import GenerateImage from './nodes/GenerateImage';
+
 import Toolbar from './Toolbar';
 import './styles/ScriptEditor.css';
 
@@ -174,6 +176,36 @@ export default function ScriptEditor() {
     const [blockType, setBlockType] = useState('actionBlock');
     const [scenes, setScenes] = useState([]);
     const contentRef = useRef(null);
+    const [prompt, setPrompt] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [error, setError] = useState('');
+
+    const handleSubmit = async (e) => {
+
+        try {
+        const response = await fetch('http://localhost:5000/generate-image', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt }),
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        if (response.ok) {
+            setImageUrl(data.image_url);
+            setError('');
+        } else {
+            setError(data.error || 'Something went wrong');
+            setImageUrl('');
+        }
+        } catch (err) {
+        setError('Network error: ' + err.message);
+        setImageUrl('');
+        }
+    };
 
     const editor = useEditor({
         extensions: [
@@ -183,7 +215,7 @@ export default function ScriptEditor() {
             ActionBlock,
             CharacterName,
             Dialogue,
-            SceneHeading,
+            SceneHeading
         ],
         content: '<actionBlock>Start typing your script...</actionBlock>',
         onUpdate: ({ editor }) => {
@@ -230,15 +262,11 @@ export default function ScriptEditor() {
     }, [editor]);
 
         const onDragEnd = (result) => {
-        if (!result.destination) {
-            return;
-        }
-
-        const items = Array.from(scenes);
-        const [reorderedItem] = items.splice(result.source.index, 1);
-        items.splice(result.destination.index, 0, reorderedItem);
-
-        setScenes(items);
+            if (result.destination) {
+                setPrompt(scenes[result.destination.index]);
+                handleSubmit();
+            };
+            
     };
 
         return (
@@ -247,6 +275,8 @@ export default function ScriptEditor() {
             <div className="editor-container">
                 <EditorContent editor={editor} />
             </div>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {imageUrl && <img src={imageUrl} alt="Generated" />}
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="scenes">
                     {(provided) => (

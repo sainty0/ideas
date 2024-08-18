@@ -13,7 +13,23 @@ class ImageGenerator():
 
 
     def make_prompt(self, text):
-        prompt = "Can you create an image for a story board using the Scene described here: " + text
+        content = text['content']
+        result = []
+        special_chars = {
+            '\n': '\\x0a',  # Hexadecimal for newline
+            '\r': '\\x0d',  # Hexadecimal for carriage return
+            # Add other special characters if needed
+        }
+
+        for char in content:
+            if char in special_chars:
+                result.append(special_chars[char])
+            else:
+                result.append(char)
+
+        ''.join(result)
+        print(result)
+        prompt = "Can you create an image for a story board using the Scene described here: "
         return prompt
 
 
@@ -30,5 +46,6 @@ class ImageGenerator():
         return image_url
     
 
-    def mock_openai_image_create(self, prompt):
+    def mock_openai_image_create(self, text):
+        prompt = self.make_prompt(text)
         return "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Cute_dog.jpg/1200px-Cute_dog.jpg?20140729055059"
