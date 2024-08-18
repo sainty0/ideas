@@ -1,15 +1,3 @@
-.page {
-  width: 21cm;
-  height: 29.7cm;
-  margin: 1cm auto;
-  padding: 1cm;
-  background: white;
-  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.2); /* Adds a subtle shadow to mimic paper */
-  border: 1px solid #ddd;
-  overflow: hidden; /* Ensures content is contained within each page */
-  page-break-after: always; /* Forces a break after each page */
-}
-
 /* Styling the content inside the editor */
 .EditorContent {
   font-family: 'Courier', monospace; /* Common font for screenwriting */
@@ -25,24 +13,6 @@
   page-break-after: always;
 }
 
-/* Toolbar styles */
-.toolbar {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-
-.toolbar button {
-  padding: 0.5rem 1rem;
-  margin: 0 0.5rem;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  cursor: pointer;
-}
-
-.toolbar button:hover {
-  background-color: #ddd;
-}
 
 /* Scene Heading - Typically all caps */
 .scene-heading {
@@ -83,16 +53,70 @@
   margin: 10px 0;
 }
 
-.editor-container {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 20px;
+p {
+  font-family: 'Courier', monospace;
+  font-size: 12pt;
+  line-height: 1.5;
+  text-align: left;
+  margin: 10px 0;
 }
 
+.script-editor {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(145deg, rgba(100, 200, 220, 0.6), rgba(255, 255, 255, 0.1));
+    height: 100vh;
+    backdrop-filter: blur(10px);
+}
+
+.editor-container {
+      flex: 1;
+    overflow-y: auto;
+    width: 210mm; /* A4 page width */
+    height: 297mm; /* A4 page height */
+    background: linear-gradient(145deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.2));
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    border-radius: 12px;
+    margin-right: 20px;
+    overflow-y: auto;
+    backdrop-filter: blur(12px);
+    box-shadow: rgba(240, 46, 170, 0.4) -5px 5px, rgba(240, 46, 170, 0.3) -10px 10px, rgba(240, 46, 170, 0.2) -15px 15px, rgba(240, 46, 170, 0.1) -20px 20px, rgba(240, 46, 170, 0.05) -25px 25px;
+}
+
+.scene-list {
+    background: rgba(255, 255, 255, 0.3);
+    max-height: 297mm; /* Match A4 height */
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: rgba(240, 46, 170, 0.4) -5px 5px, rgba(240, 46, 170, 0.3) -10px 10px, rgba(240, 46, 170, 0.2) -15px 15px, rgba(240, 46, 170, 0.1) -20px 20px, rgba(240, 46, 170, 0.05) -25px 25px;
+    overflow-y: auto;
+    backdrop-filter: blur(10px);
+    width: 300px;
+    margin-left: 20px;
+
+}
 .scene-item {
-    padding: 10px;
-    margin: 5px 0;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    cursor: move;
+    background: rgba(255, 255, 255, 0.3);
+
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+    cursor: grab;
+    z-index: 1000;
+    transition: all 0.2s ease;
+    position: relative; 
+}
+
+.scene-item:active {
+    cursor: grabbing;
+     transform: translate(0, 0);
+    position: absolute;
+    left: 1000px !important;
+}
+.scene-item:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.02);
 }

@@ -19,7 +19,7 @@ export default function ScriptEditor({ toggleBlockType }) {
     const editorRef = useRef(null);
     const viewRef = useRef(null);
     const [scenes, setScenes] = useState([]);
-    const [currentBlockType, setCurrentBlockType] = useState('actionBlock');
+    const [currentBlockType, setCurrentBlockType] = useState('sceneHeading');
 
     const toggleBold = () => {
         const { state, dispatch } = viewRef.current;
@@ -58,8 +58,8 @@ export default function ScriptEditor({ toggleBlockType }) {
                     keymap({
                         'Mod-z': undo,
                         'Mod-y': redo,
-                        'Enter': customSplitBlock, // Use custom command for Enter
-                        ...baseKeymap
+                        'Enter': customSplitBlock,
+                        // ...baseKeymap
                     }),
                     new Plugin({
                         props: {
@@ -97,10 +97,9 @@ export default function ScriptEditor({ toggleBlockType }) {
     }, []);
 
     const customSplitBlock = (state, dispatch) => {
+        console.log("here");
   const { $from, $to } = state.selection;
   const { schema } = state;
-
-  if ($from.parent.type === schema.nodes.sceneHeading) {
     if (dispatch) {
       let tr = state.tr.split($from.pos);
 
@@ -111,7 +110,6 @@ export default function ScriptEditor({ toggleBlockType }) {
       dispatch(tr);
     }
     return true;
-  }
 
   return false;
 };
@@ -167,17 +165,19 @@ export default function ScriptEditor({ toggleBlockType }) {
 
     return (
         <div className="script-editor">
-            <Toolbar
-                toggleBlockType={handleToggleBlockType}
-                currentBlockType={currentBlockType}
-                toggleBold={toggleBold}
-                toggleItalic={toggleItalic}
-                toggleBulletList={toggleBulletList}
-                toggleOrderedList={toggleOrderedList}
-            />
-            <div className="editor-container" ref={editorRef}></div>
+            <div className="editor-wrapper">
+                <Toolbar
+                    toggleBlockType={handleToggleBlockType}
+                    currentBlockType={currentBlockType}
+                    toggleBold={toggleBold}
+                    toggleItalic={toggleItalic}
+                    toggleBulletList={toggleBulletList}
+                    toggleOrderedList={toggleOrderedList}
+                />
+                <div className="editor-container" ref={editorRef}></div>
+            </div>
             <SceneList scenes={scenes} onDragEnd={handleDragEnd} />
         </div>
-    );
+    );    
 }
 

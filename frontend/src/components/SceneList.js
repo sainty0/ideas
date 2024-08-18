@@ -15,6 +15,10 @@ function SceneList({ scenes, onDragEnd }) {
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}
+                                                    style={{ ...provided.draggableProps.style,
+                                                        left: "auto !important",
+                                                        top: "auto !important",
+                                                }}
                                     >
                                         Scene {index + 1}
                                     </div>

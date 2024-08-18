@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './styles/Toolbar.css';
 
 function Toolbar({ toggleBlockType, currentBlockType, toggleBold, toggleItalic, toggleBulletList, toggleOrderedList }) {
   const [selectedBlockType, setSelectedBlockType] = useState(currentBlockType);
@@ -11,6 +12,7 @@ function Toolbar({ toggleBlockType, currentBlockType, toggleBold, toggleItalic, 
 
   return (
     <div className="toolbar">
+      <h1>Ideas</h1>
       {/* Dropdown for block types */}
       <select value={selectedBlockType} onChange={handleBlockTypeChange}>
         <option value="sceneHeading">Scene Heading</option>
