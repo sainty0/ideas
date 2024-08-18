@@ -4,6 +4,10 @@ import { schema as basicSchema } from 'prosemirror-schema-basic';
 
 const mySchema = new Schema({
   nodes: basicSchema.spec.nodes.append({
+    doc: {
+      content: "block+",
+      defaultType: "actionBlock" // Set the default block type
+    },
     sceneHeading: {
       content: "text*",
       group: "block",

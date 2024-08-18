@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { EditorState, Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
@@ -6,7 +5,7 @@ import { dropCursor } from 'prosemirror-dropcursor';
 import { history } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
 import { undo, redo } from 'prosemirror-history';
-import { baseKeymap, splitBlock } from 'prosemirror-commands';
+import { baseKeymap, splitBlock, splitBlockAs, setBlockType } from 'prosemirror-commands';
 import { toggleMark } from 'prosemirror-commands';
 import { wrapInList } from 'prosemirror-schema-list'; // For lists
 import { bulletList, orderedList, listItem } from 'prosemirror-schema-list';
@@ -20,7 +19,7 @@ export default function ScriptEditor({ toggleBlockType }) {
     const editorRef = useRef(null);
     const viewRef = useRef(null);
     const [scenes, setScenes] = useState([]);
-    const [blockType, setBlockType] = useState('actionBlock');
+    const [currentBlockType, setCurrentBlockType] = useState('actionBlock');
 
     const toggleBold = () => {
         const { state, dispatch } = viewRef.current;
@@ -50,13 +49,16 @@ export default function ScriptEditor({ toggleBlockType }) {
         if (editorRef.current) {
             const state = EditorState.create({
                 schema: mySchema,
+                doc: mySchema.node('doc', null, [
+                    mySchema.node('sceneHeading')
+                ]),
                 plugins: [
                     dropCursor(),
                     history(),
                     keymap({
                         'Mod-z': undo,
                         'Mod-y': redo,
-                        'Enter': splitBlock,
+                        'Enter': customSplitBlock, // Use custom command for Enter
                         ...baseKeymap
                     }),
                     new Plugin({
@@ -94,6 +96,26 @@ export default function ScriptEditor({ toggleBlockType }) {
         }
     }, []);
 
+    const customSplitBlock = (state, dispatch) => {
+  const { $from, $to } = state.selection;
+  const { schema } = state;
+
+  if ($from.parent.type === schema.nodes.sceneHeading) {
+    if (dispatch) {
+      let tr = state.tr.split($from.pos);
+
+      // Ensure the new block is of type actionBlock
+      const newPos = tr.mapping.map($from.pos + 1);
+      tr = tr.setBlockType(newPos, newPos, schema.nodes.actionBlock);
+
+      dispatch(tr);
+    }
+    return true;
+  }
+
+  return false;
+};
+
     const updateScenes = (state) => {
         const scenesList = [];
         let sceneStart = null;
@@ -125,9 +147,9 @@ export default function ScriptEditor({ toggleBlockType }) {
 
         // Update the editor with the new scene order
         const tr = viewRef.current.state.tr;
-        tr.delete(0, viewRef.current.state.doc.content.size); // Clear current document
+        tr.delete(0, viewRef.current.state.doc.content.size);
         reorderedScenes.forEach(scene => {
-            tr.insert(tr.doc.content.size, scene.content); // Insert scenes in new order
+            tr.insert(tr.doc.content.size, scene.content);
         });
         viewRef.current.dispatch(tr);
     };
@@ -137,7 +159,7 @@ export default function ScriptEditor({ toggleBlockType }) {
         const { state, dispatch } = viewRef.current;
         const { selection, schema } = state;
         const blockType = schema.nodes[type];
-        if (blockType) {
+        if (currentBlockType) {
             const tr = state.tr.setBlockType(selection.from, selection.to, blockType);
             dispatch(tr);
         }
@@ -147,7 +169,7 @@ export default function ScriptEditor({ toggleBlockType }) {
         <div className="script-editor">
             <Toolbar
                 toggleBlockType={handleToggleBlockType}
-                currentBlockType={blockType}
+                currentBlockType={currentBlockType}
                 toggleBold={toggleBold}
                 toggleItalic={toggleItalic}
                 toggleBulletList={toggleBulletList}
@@ -158,3 +180,4 @@ export default function ScriptEditor({ toggleBlockType }) {
         </div>
     );
 }
+

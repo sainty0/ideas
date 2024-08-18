@@ -15,6 +15,7 @@ function Toolbar({ toggleBlockType, currentBlockType, toggleBold, toggleItalic, 
       <select value={selectedBlockType} onChange={handleBlockTypeChange}>
         <option value="sceneHeading">Scene Heading</option>
         <option value="actionBlock">Action Block</option>
+        <option value="character">character</option>
         <option value="dialogue">Dialogue</option>
       </select>
       <button onClick={toggleBold}>Bold</button>
