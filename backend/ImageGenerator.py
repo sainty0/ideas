@@ -7,29 +7,20 @@ import base64
 
 class ImageGenerator():
     def __init__(self) -> None:
-        #client = openai()
+        openai.api_key_path = "/home/mark/Documents/Hackathon/APIKeyOPENIA.zshrc"
         self.size = "512x512"
         self.n = 1
 
 
+    def delete_every_second_line(self, content):
+        lines = content.splitlines()
+        filtered_lines = [line for i, line in enumerate(lines) if i % 2 == 0]
+        return '\n'.join(filtered_lines)
+
     def make_prompt(self, text):
         content = text['content']
-        result = []
-        special_chars = {
-            '\n': '\\x0a',  # Hexadecimal for newline
-            '\r': '\\x0d',  # Hexadecimal for carriage return
-            # Add other special characters if needed
-        }
-
-        for char in content:
-            if char in special_chars:
-                result.append(special_chars[char])
-            else:
-                result.append(char)
-
-        ''.join(result)
-        print(result)
-        prompt = "Can you create an image for a story board using the Scene described here: "
+        out = self.delete_every_second_line(content)
+        prompt = "Can you create an image for a story board using the Scene described here: " + out
         return prompt
 
 
@@ -48,4 +39,5 @@ class ImageGenerator():
 
     def mock_openai_image_create(self, text):
         prompt = self.make_prompt(text)
+        print(prompt)
         return "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Cute_dog.jpg/1200px-Cute_dog.jpg?20140729055059"
