@@ -1,88 +1,25 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { EditorState, Plugin } from 'prosemirror-state';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import Toolbar from './Toolbar';
 import { EditorView } from 'prosemirror-view';
-import { Schema } from 'prosemirror-model';
-import { schema as basicSchema } from 'prosemirror-schema-basic';
 import { dropCursor } from 'prosemirror-dropcursor';
 import { history } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
 import { undo, redo } from 'prosemirror-history';
-import { baseKeymap, splitBlock } from 'prosemirror-commands';
+import { baseKeymap, splitBlock, splitBlockAs, setBlockType } from 'prosemirror-commands';
 import { toggleMark } from 'prosemirror-commands';
 import { wrapInList } from 'prosemirror-schema-list'; // For lists
 import { bulletList, orderedList, listItem } from 'prosemirror-schema-list';
 
+import mySchema from './Schema';
+import Toolbar from './Toolbar';
+import SceneList from './SceneList';
 import './styles/ScriptEditor.css';
-const mySchema = new Schema({
-    nodes: basicSchema.spec.nodes.append({
-        sceneHeading: {
-            content: "text*",
-            group: "block",
-            toDOM() { return ["h1", { class: "scene-heading" }, 0]; },
-            parseDOM: [{ tag: "h1.scene-heading" }]
-        },
-        actionBlock: {
-            content: "text*",
-            group: "block",
-            toDOM() { return ["p", { class: "action-block" }, 0]; },
-            parseDOM: [{ tag: "p.action-block" }]
-        },
-        dialogue: {
-            content: "text*",
-            group: "block",
-            toDOM() { return ["p", { class: "dialogue" }, 0]; },
-            parseDOM: [{ tag: "p.dialogue" }]
-        },
-        character: {
-            content: "text*",
-            group: "block",
-            toDOM() { return ["p", { class: "character-name" }, 0]; },
-            parseDOM: [{ tag: "p.character-name" }]
-        },
-        bullet_list: {
-            group: "block",
-            content: "list_item+",
-            toDOM() { return ["ul", 0]; },
-            parseDOM: [{ tag: "ul" }]
-        },
-        ordered_list: {
-            group: "block",
-            content: "list_item+",
-            attrs: { order: { default: 1 } },
-            toDOM(node) { return ["ol", { start: node.attrs.order }, 0]; },
-            parseDOM: [{
-                tag: "ol",
-                getAttrs(dom) { return { order: dom.hasAttribute("start") ? +dom.getAttribute("start") : 1 }; }
-            }]
-        },
-        list_item: {
-            content: "paragraph block*",
-            toDOM() { return ["li", 0]; },
-            parseDOM: [{ tag: "li" }]
-        }
-    }),
-    marks: basicSchema.spec.marks.append({
-        bold: {
-            toDOM: () => ["strong", 0],
-            parseDOM: [{ tag: "strong" }]
-        },
-        italic: {
-            toDOM: () => ["em", 0],
-            parseDOM: [{ tag: "em" }]
-        }
-    })
-});
-
-
 
 export default function ScriptEditor({ toggleBlockType }) {
     const editorRef = useRef(null);
     const viewRef = useRef(null);
     const [scenes, setScenes] = useState([]);
-    const [blockType, setBlockType] = useState('actionBlock');
+    const [currentBlockType, setCurrentBlockType] = useState('sceneHeading');
     const [prompt, setPrompt] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [imageUrls, setImageUrls] = useState([]);
@@ -145,14 +82,17 @@ export default function ScriptEditor({ toggleBlockType }) {
         if (editorRef.current) {
             const state = EditorState.create({
                 schema: mySchema,
+                doc: mySchema.node('doc', null, [
+                    mySchema.node('sceneHeading')
+                ]),
                 plugins: [
                     dropCursor(),
                     history(),
                     keymap({
                         'Mod-z': undo,
                         'Mod-y': redo,
-                        'Enter': splitBlock,
-                        ...baseKeymap
+                        'Enter': customSplitBlock,
+                        // ...baseKeymap
                     }),
                     new Plugin({
                         props: {
@@ -188,6 +128,24 @@ export default function ScriptEditor({ toggleBlockType }) {
             };
         }
     }, []);
+
+    const customSplitBlock = (state, dispatch) => {
+        console.log("here");
+  const { $from, $to } = state.selection;
+  const { schema } = state;
+    if (dispatch) {
+      let tr = state.tr.split($from.pos);
+
+      // Ensure the new block is of type actionBlock
+      const newPos = tr.mapping.map($from.pos + 1);
+      tr = tr.setBlockType(newPos, newPos, schema.nodes.actionBlock);
+
+      dispatch(tr);
+    }
+    return true;
+
+  return false;
+};
 
     const updateScenes = (state) => {
         const scenesList = [];
@@ -232,9 +190,9 @@ export default function ScriptEditor({ toggleBlockType }) {
 
         // Update the editor with the new scene order
         const tr = viewRef.current.state.tr;
-        tr.delete(0, viewRef.current.state.doc.content.size); // Clear current document
+        tr.delete(0, viewRef.current.state.doc.content.size);
         reorderedScenes.forEach(scene => {
-            tr.insert(tr.doc.content.size, scene.content); // Insert scenes in new order
+            tr.insert(tr.doc.content.size, scene.content);
         });
         viewRef.current.dispatch(tr);
     };
@@ -244,7 +202,7 @@ export default function ScriptEditor({ toggleBlockType }) {
         const { state, dispatch } = viewRef.current;
         const { selection, schema } = state;
         const blockType = schema.nodes[type];
-        if (blockType) {
+        if (currentBlockType) {
             const tr = state.tr.setBlockType(selection.from, selection.to, blockType);
             dispatch(tr);
         }
@@ -253,47 +211,19 @@ export default function ScriptEditor({ toggleBlockType }) {
 
     return (
         <div className="script-editor">
-            <Toolbar
-                toggleBlockType={handleToggleBlockType}
-                currentBlockType={blockType}
-                toggleBold={toggleBold}
-                toggleItalic={toggleItalic}
-                toggleBulletList={toggleBulletList}
-                toggleOrderedList={toggleOrderedList}
-            />
-            <div className="editor-container" ref={editorRef}></div>
-            <SceneList scenes={scenes} onDragEnd={handleDragEnd} imageUrls={imageUrls} />
+            <div className="editor-wrapper">
+                <Toolbar
+                    toggleBlockType={handleToggleBlockType}
+                    currentBlockType={currentBlockType}
+                    toggleBold={toggleBold}
+                    toggleItalic={toggleItalic}
+                    toggleBulletList={toggleBulletList}
+                    toggleOrderedList={toggleOrderedList}
+                />
+                <div className="editor-container" ref={editorRef}></div>
+            </div>
+            <SceneList scenes={scenes} onDragEnd={handleDragEnd} />
         </div>
-    );
+    );    
 }
 
-function SceneList({ scenes, onDragEnd, imageUrls }) {
-    return (
-        <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="scenes">
-                {(provided) => (
-                    <div className="scene-list" {...provided.droppableProps} ref={provided.innerRef}>
-                        {scenes.map((scene, index) => (
-                            <Draggable key={scene.id} draggableId={scene.id} index={index}>
-                                {(provided) => (
-                                    <div
-                                        className="scene-item"
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                    >
-                                        Scene {index + 1}
-                                        
-                                        
-                                        {imageUrls[index] && <img src={imageUrls[index]} alt="Generated" />}
-                                    </div>
-                                )}
-                            </Draggable>
-                        ))}
-                        {provided.placeholder}
-                    </div>
-                )}
-            </Droppable>
-        </DragDropContext>
-    );
-}
