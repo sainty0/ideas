@@ -104,7 +104,8 @@ export default function ScriptEditor({ toggleBlockType }) {
 
           if (response.ok) {
               setImageUrl(data.image_url);
-              imageUrls.push(data.image_url);
+              setImageUrls([...imageUrls, data.image_url]);
+              
               setError('');
           } else {
               setError(data.error || 'Something went wrong');
@@ -212,8 +213,10 @@ export default function ScriptEditor({ toggleBlockType }) {
         if (!result.destination) return;
 
         const reorderedScenes = Array.from(scenes);
+        imageUrls.splice(result.destination.index);
         const reorderedImages = Array.from(imageUrls);
         if (result.destination) {
+          
           setPrompt(scenes[result.destination.index]);
           handleSubmit();
         };
@@ -246,6 +249,7 @@ export default function ScriptEditor({ toggleBlockType }) {
             dispatch(tr);
         }
     };
+    console.log(imageUrls)
 
     return (
         <div className="script-editor">
@@ -258,8 +262,6 @@ export default function ScriptEditor({ toggleBlockType }) {
                 toggleOrderedList={toggleOrderedList}
             />
             <div className="editor-container" ref={editorRef}></div>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {imageUrl && <img src={imageUrl} alt="Generated" />}
             <SceneList scenes={scenes} onDragEnd={handleDragEnd} imageUrls={imageUrls} />
         </div>
     );
@@ -282,7 +284,8 @@ function SceneList({ scenes, onDragEnd, imageUrls }) {
                                     >
                                         Scene {index + 1}
                                         
-                                        {/* {imageUrls[index] && <img src={imageUrls[index]} alt="Generated" />} */}
+                                        
+                                        {imageUrls[index] && <img src={imageUrls[index]} alt="Generated" />}
                                     </div>
                                 )}
                             </Draggable>

@@ -14,18 +14,19 @@ class ImageGenerator():
 
     def deconstruct_all(self, content):
         paragraph = ''
+        print(content)
         for dictionary in content:
+            print(dictionary)
             try: 
-                paragraph += dictionary['content']['text']
+                paragraph += dictionary['content'][0]['text']
             except:
                 pass
 
-                                
+        print(paragraph)                
         return paragraph
 
     def make_prompt(self, text):
         content = text['content']
-        print(content)
         create_word = self.deconstruct_all(content)
         prompt = "Can you create an image for a story board using the Scene described here: " + create_word
         return prompt
