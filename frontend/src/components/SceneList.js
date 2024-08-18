@@ -21,7 +21,7 @@ function SceneList({ scenes, onDragEnd, imageUrls }) {
                                                 }}
                                     >
                                         Scene {index + 1}
-                                        {imageUrls[index] && <img src={imageUrls[index]} alt="Generated" />}
+                                        {imageUrls[index] && <img src={imageUrls[index]} class="generated" alt="Generated" />}
                                     </div>
                                 )}
                             </Draggable>
