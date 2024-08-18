@@ -12,6 +12,9 @@
   display: block;
   page-break-after: always;
 }
+.generated {
+  width: 90%;
+}
 
 
 /* Scene Heading - Typically all caps */
