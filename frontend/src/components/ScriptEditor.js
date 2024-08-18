@@ -83,27 +83,6 @@ export default function ScriptEditor({ toggleBlockType }) {
     const viewRef = useRef(null);
     const [scenes, setScenes] = useState([]);
     const [blockType, setBlockType] = useState('actionBlock');
-<<<<<<< HEAD
-
-    const toggleBold = () => {
-        const { state, dispatch } = viewRef.current;
-        const { schema } = state;
-        toggleMark(schema.marks.bold)(state, dispatch);
-    };
-
-    const toggleItalic = () => {
-        const { state, dispatch } = viewRef.current;
-        const { schema } = state;
-        toggleMark(schema.marks.italic)(state, dispatch);
-    };
-
-    const toggleBulletList = () => {
-        const { state, dispatch } = viewRef.current;
-        const { schema } = state;
-        wrapInList(schema.nodes.bullet_list)(state, dispatch);
-    };
-
-=======
     const [prompt, setPrompt] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [error, setError] = useState('');
@@ -153,7 +132,6 @@ export default function ScriptEditor({ toggleBlockType }) {
         wrapInList(schema.nodes.bullet_list)(state, dispatch);
     };
 
->>>>>>> aiparts
     const toggleOrderedList = () => {
         const { state, dispatch } = viewRef.current;
         const { schema } = state;
@@ -274,11 +252,8 @@ export default function ScriptEditor({ toggleBlockType }) {
                 toggleOrderedList={toggleOrderedList}
             />
             <div className="editor-container" ref={editorRef}></div>
-<<<<<<< HEAD
-=======
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {imageUrl && <img src={imageUrl} alt="Generated" />}
->>>>>>> aiparts
             <SceneList scenes={scenes} onDragEnd={handleDragEnd} />
         </div>
     );
@@ -310,9 +285,4 @@ function SceneList({ scenes, onDragEnd }) {
             </Droppable>
         </DragDropContext>
     );
-<<<<<<< HEAD
 }
-
-=======
-}
->>>>>>> aiparts
