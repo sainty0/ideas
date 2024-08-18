@@ -85,6 +85,7 @@ export default function ScriptEditor({ toggleBlockType }) {
     const [blockType, setBlockType] = useState('actionBlock');
     const [prompt, setPrompt] = useState('');
     const [imageUrl, setImageUrl] = useState('');
+    const [imageUrls, setImageUrls] = useState([]);
     const [error, setError] = useState('');
 
       const handleSubmit = async (e) => {
@@ -99,10 +100,11 @@ export default function ScriptEditor({ toggleBlockType }) {
           });
 
           const data = await response.json();
-          console.log(data);
+          console.log(data.image_url);
 
           if (response.ok) {
               setImageUrl(data.image_url);
+              imageUrls.push(data.image_url);
               setError('');
           } else {
               setError(data.error || 'Something went wrong');
@@ -210,15 +212,19 @@ export default function ScriptEditor({ toggleBlockType }) {
         if (!result.destination) return;
 
         const reorderedScenes = Array.from(scenes);
+        const reorderedImages = Array.from(imageUrls);
         if (result.destination) {
           setPrompt(scenes[result.destination.index]);
           handleSubmit();
         };
+        
+
         const [removed] = reorderedScenes.splice(result.source.index, 1);
         reorderedScenes.splice(result.destination.index, 0, removed);
 
         setScenes(reorderedScenes);
-        
+        reorderedImages.splice(result.destination.index, 0, removed);
+        setImageUrls(reorderedImages);
         
 
         // Update the editor with the new scene order
@@ -252,14 +258,12 @@ export default function ScriptEditor({ toggleBlockType }) {
                 toggleOrderedList={toggleOrderedList}
             />
             <div className="editor-container" ref={editorRef}></div>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {imageUrl && <img src={imageUrl} alt="Generated" />}
-            <SceneList scenes={scenes} onDragEnd={handleDragEnd} />
+            <SceneList scenes={scenes} onDragEnd={handleDragEnd} imageUrls={imageUrls} />
         </div>
     );
 }
 
-function SceneList({ scenes, onDragEnd }) {
+function SceneList({ scenes, onDragEnd, imageUrls }) {
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="scenes">
@@ -275,6 +279,7 @@ function SceneList({ scenes, onDragEnd }) {
                                         {...provided.dragHandleProps}
                                     >
                                         Scene {index + 1}
+                                        {imageUrls[index] && <img src={imageUrls[index]} alt="Generated" />}
                                     </div>
                                 )}
                             </Draggable>
