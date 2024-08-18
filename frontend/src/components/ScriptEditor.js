@@ -17,235 +17,235 @@ import { bulletList, orderedList, listItem } from 'prosemirror-schema-list';
 
 import './styles/ScriptEditor.css';
 const mySchema = new Schema({
-  nodes: basicSchema.spec.nodes.append({
-    sceneHeading: {
-      content: "text*",
-      group: "block",
-      toDOM() { return ["h1", { class: "scene-heading" }, 0]; },
-      parseDOM: [{ tag: "h1.scene-heading" }]
-    },
-    actionBlock: {
-      content: "text*",
-      group: "block",
-      toDOM() { return ["p", { class: "action-block" }, 0]; },
-      parseDOM: [{ tag: "p.action-block" }]
-    },
-    dialogue: {
-      content: "text*",
-      group: "block",
-      toDOM() { return ["p", { class: "dialogue" }, 0]; },
-      parseDOM: [{ tag: "p.dialogue" }]
-    },
-    character: {
-      content: "text*",
-      group: "block",
-      toDOM() { return ["p", { class: "character-name" }, 0]; },
-      parseDOM: [{ tag: "p.character-name" }]
-    },
-    bullet_list: {
-      group: "block",
-      content: "list_item+",
-      toDOM() { return ["ul", 0]; },
-      parseDOM: [{ tag: "ul" }]
-    },
-    ordered_list: {
-      group: "block",
-      content: "list_item+",
-      attrs: { order: { default: 1 } },
-      toDOM(node) { return ["ol", { start: node.attrs.order }, 0]; },
-      parseDOM: [{
-        tag: "ol",
-        getAttrs(dom) { return { order: dom.hasAttribute("start") ? +dom.getAttribute("start") : 1 }; }
-      }]
-    },
-    list_item: {
-      content: "paragraph block*",
-      toDOM() { return ["li", 0]; },
-      parseDOM: [{ tag: "li" }]
-    }
-  }),
-  marks: basicSchema.spec.marks.append({
-    bold: {
-      toDOM: () => ["strong", 0],
-      parseDOM: [{ tag: "strong" }]
-    },
-    italic: {
-      toDOM: () => ["em", 0],
-      parseDOM: [{ tag: "em" }]
-    }
-  })
+    nodes: basicSchema.spec.nodes.append({
+        sceneHeading: {
+            content: "text*",
+            group: "block",
+            toDOM() { return ["h1", { class: "scene-heading" }, 0]; },
+            parseDOM: [{ tag: "h1.scene-heading" }]
+        },
+        actionBlock: {
+            content: "text*",
+            group: "block",
+            toDOM() { return ["p", { class: "action-block" }, 0]; },
+            parseDOM: [{ tag: "p.action-block" }]
+        },
+        dialogue: {
+            content: "text*",
+            group: "block",
+            toDOM() { return ["p", { class: "dialogue" }, 0]; },
+            parseDOM: [{ tag: "p.dialogue" }]
+        },
+        character: {
+            content: "text*",
+            group: "block",
+            toDOM() { return ["p", { class: "character-name" }, 0]; },
+            parseDOM: [{ tag: "p.character-name" }]
+        },
+        bullet_list: {
+            group: "block",
+            content: "list_item+",
+            toDOM() { return ["ul", 0]; },
+            parseDOM: [{ tag: "ul" }]
+        },
+        ordered_list: {
+            group: "block",
+            content: "list_item+",
+            attrs: { order: { default: 1 } },
+            toDOM(node) { return ["ol", { start: node.attrs.order }, 0]; },
+            parseDOM: [{
+                tag: "ol",
+                getAttrs(dom) { return { order: dom.hasAttribute("start") ? +dom.getAttribute("start") : 1 }; }
+            }]
+        },
+        list_item: {
+            content: "paragraph block*",
+            toDOM() { return ["li", 0]; },
+            parseDOM: [{ tag: "li" }]
+        }
+    }),
+    marks: basicSchema.spec.marks.append({
+        bold: {
+            toDOM: () => ["strong", 0],
+            parseDOM: [{ tag: "strong" }]
+        },
+        italic: {
+            toDOM: () => ["em", 0],
+            parseDOM: [{ tag: "em" }]
+        }
+    })
 });
 
 
 
 export default function ScriptEditor({ toggleBlockType }) {
-  const editorRef = useRef(null);
-  const viewRef = useRef(null);
-  const [scenes, setScenes] = useState([]);
-  const [blockType, setBlockType] = useState('actionBlock');
+    const editorRef = useRef(null);
+    const viewRef = useRef(null);
+    const [scenes, setScenes] = useState([]);
+    const [blockType, setBlockType] = useState('actionBlock');
 
-const toggleBold = () => {
-  const { state, dispatch } = viewRef.current;
-  const { schema } = state;
-  toggleMark(schema.marks.bold)(state, dispatch);
-};
+    const toggleBold = () => {
+        const { state, dispatch } = viewRef.current;
+        const { schema } = state;
+        toggleMark(schema.marks.bold)(state, dispatch);
+    };
 
-const toggleItalic = () => {
-  const { state, dispatch } = viewRef.current;
-  const { schema } = state;
-  toggleMark(schema.marks.italic)(state, dispatch);
-};
+    const toggleItalic = () => {
+        const { state, dispatch } = viewRef.current;
+        const { schema } = state;
+        toggleMark(schema.marks.italic)(state, dispatch);
+    };
 
-const toggleBulletList = () => {
-  const { state, dispatch } = viewRef.current;
-  const { schema } = state;
-  wrapInList(schema.nodes.bullet_list)(state, dispatch);
-};
+    const toggleBulletList = () => {
+        const { state, dispatch } = viewRef.current;
+        const { schema } = state;
+        wrapInList(schema.nodes.bullet_list)(state, dispatch);
+    };
 
-const toggleOrderedList = () => {
-  const { state, dispatch } = viewRef.current;
-  const { schema } = state;
-  wrapInList(schema.nodes.ordered_list)(state, dispatch);
-};
+    const toggleOrderedList = () => {
+        const { state, dispatch } = viewRef.current;
+        const { schema } = state;
+        wrapInList(schema.nodes.ordered_list)(state, dispatch);
+    };
 
-  useEffect(() => {
-    if (editorRef.current) {
-      const state = EditorState.create({
-        schema: mySchema,
-        plugins: [
-          dropCursor(),
-          history(),
-          keymap({
-            'Mod-z': undo,
-            'Mod-y': redo,
-            'Enter': splitBlock,
-            ...baseKeymap
-          }),
-          new Plugin({
-            props: {
-              handleDOMEvents: {
-                selectionchange: (_, view) => {
-                  const { $from } = view.state.selection;
-                  setBlockType($from.parent.type.name);
+    useEffect(() => {
+        if (editorRef.current) {
+            const state = EditorState.create({
+                schema: mySchema,
+                plugins: [
+                    dropCursor(),
+                    history(),
+                    keymap({
+                        'Mod-z': undo,
+                        'Mod-y': redo,
+                        'Enter': splitBlock,
+                        ...baseKeymap
+                    }),
+                    new Plugin({
+                        props: {
+                            handleDOMEvents: {
+                                selectionchange: (_, view) => {
+                                    const { $from } = view.state.selection;
+                                    setBlockType($from.parent.type.name);
+                                }
+                            }
+                        }
+                    })
+                ]
+            });
+
+            const view = new EditorView(editorRef.current, {
+                state,
+                dispatchTransaction(transaction) {
+                    const newState = view.state.apply(transaction);
+                    view.updateState(newState);
+
+                    // Update scenes when the document changes
+                    updateScenes(newState);
                 }
-              }
+            });
+
+            viewRef.current = view;
+
+            // Initialize scenes from the initial state
+            updateScenes(state);
+
+            return () => {
+                view.destroy();
+            };
+        }
+    }, []);
+
+    const updateScenes = (state) => {
+        const scenesList = [];
+        let sceneStart = null;
+
+        state.doc.forEach((node, offset) => {
+            if (node.type.name === 'sceneHeading') {
+                if (sceneStart !== null) {
+                    scenesList.push({ content: state.doc.slice(sceneStart, offset).content, start: sceneStart });
+                }
+                sceneStart = offset;
             }
-          })
-        ]
-      });
+        });
 
-      const view = new EditorView(editorRef.current, {
-        state,
-        dispatchTransaction(transaction) {
-          const newState = view.state.apply(transaction);
-          view.updateState(newState);
-
-          // Update scenes when the document changes
-          updateScenes(newState);
-        }
-      });
-
-      viewRef.current = view;
-
-      // Initialize scenes from the initial state
-      updateScenes(state);
-
-      return () => {
-        view.destroy();
-      };
-    }
-  }, []);
-
-  const updateScenes = (state) => {
-    const scenesList = [];
-    let sceneStart = null;
-
-    state.doc.forEach((node, offset) => {
-      if (node.type.name === 'sceneHeading') {
         if (sceneStart !== null) {
-          scenesList.push({ content: state.doc.slice(sceneStart, offset).content, start: sceneStart });
+            scenesList.push({ content: state.doc.slice(sceneStart).content, start: sceneStart });
         }
-        sceneStart = offset;
-      }
-    });
 
-    if (sceneStart !== null) {
-      scenesList.push({ content: state.doc.slice(sceneStart).content, start: sceneStart });
-    }
+        setScenes(scenesList.map((scene, index) => ({ id: `scene-${index}`, ...scene })));
+    };
 
-    setScenes(scenesList.map((scene, index) => ({ id: `scene-${index}`, ...scene })));
-  };
+    const handleDragEnd = (result) => {
+        if (!result.destination) return;
 
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
+        const reorderedScenes = Array.from(scenes);
+        const [removed] = reorderedScenes.splice(result.source.index, 1);
+        reorderedScenes.splice(result.destination.index, 0, removed);
 
-    const reorderedScenes = Array.from(scenes);
-    const [removed] = reorderedScenes.splice(result.source.index, 1);
-    reorderedScenes.splice(result.destination.index, 0, removed);
+        setScenes(reorderedScenes);
 
-    setScenes(reorderedScenes);
+        // Update the editor with the new scene order
+        const tr = viewRef.current.state.tr;
+        tr.delete(0, viewRef.current.state.doc.content.size); // Clear current document
+        reorderedScenes.forEach(scene => {
+            tr.insert(tr.doc.content.size, scene.content); // Insert scenes in new order
+        });
+        viewRef.current.dispatch(tr);
+    };
 
-    // Update the editor with the new scene order
-    const tr = viewRef.current.state.tr;
-    tr.delete(0, viewRef.current.state.doc.content.size); // Clear current document
-    reorderedScenes.forEach(scene => {
-      tr.insert(tr.doc.content.size, scene.content); // Insert scenes in new order
-    });
-    viewRef.current.dispatch(tr);
-  };
+    // Function to toggle block types for formatting
+    const handleToggleBlockType = (type) => {
+        const { state, dispatch } = viewRef.current;
+        const { selection, schema } = state;
+        const blockType = schema.nodes[type];
+        if (blockType) {
+            const tr = state.tr.setBlockType(selection.from, selection.to, blockType);
+            dispatch(tr);
+        }
+    };
 
-  // Function to toggle block types for formatting
-  const handleToggleBlockType = (type) => {
-    const { state, dispatch } = viewRef.current;
-    const { selection, schema } = state;
-    const blockType = schema.nodes[type];
-    if (blockType) {
-      const tr = state.tr.setBlockType(selection.from, selection.to, blockType);
-      dispatch(tr);
-    }
-  };
-
-  return (
-    <div className="script-editor">
+    return (
+        <div className="script-editor">
             <Toolbar
-  toggleBlockType={handleToggleBlockType}
-  currentBlockType={blockType}
-  toggleBold={toggleBold}
-  toggleItalic={toggleItalic}
-  toggleBulletList={toggleBulletList}
-  toggleOrderedList={toggleOrderedList}
-/>
-      <div className="editor-container" ref={editorRef}></div>
-      <SceneList scenes={scenes} onDragEnd={handleDragEnd} />
-    </div>
-  );
+                toggleBlockType={handleToggleBlockType}
+                currentBlockType={blockType}
+                toggleBold={toggleBold}
+                toggleItalic={toggleItalic}
+                toggleBulletList={toggleBulletList}
+                toggleOrderedList={toggleOrderedList}
+            />
+            <div className="editor-container" ref={editorRef}></div>
+            <SceneList scenes={scenes} onDragEnd={handleDragEnd} />
+        </div>
+    );
 }
 
 function SceneList({ scenes, onDragEnd }) {
-  return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="scenes">
-        {(provided) => (
-          <div className="scene-list" {...provided.droppableProps} ref={provided.innerRef}>
-            {scenes.map((scene, index) => (
-              <Draggable key={scene.id} draggableId={scene.id} index={index}>
+    return (
+        <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="scenes">
                 {(provided) => (
-                  <div
-                    className="scene-item"
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                  >
-                    Scene {index + 1}
-                  </div>
+                    <div className="scene-list" {...provided.droppableProps} ref={provided.innerRef}>
+                        {scenes.map((scene, index) => (
+                            <Draggable key={scene.id} draggableId={scene.id} index={index}>
+                                {(provided) => (
+                                    <div
+                                        className="scene-item"
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                    >
+                                        Scene {index + 1}
+                                    </div>
+                                )}
+                            </Draggable>
+                        ))}
+                        {provided.placeholder}
+                    </div>
                 )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
-  );
+            </Droppable>
+        </DragDropContext>
+    );
 }
 
