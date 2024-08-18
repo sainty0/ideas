@@ -4,12 +4,14 @@ from io import BytesIO
 from PIL import Image
 import base64
 from ImageGenerator import ImageGenerator
+from flask_cors import CORS
 
 app = Flask(__name__)
 ImageGenerator = ImageGenerator()
+CORS(app)
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/generate-image', methods=['POST'])
+def generate_image():
     data = request.json
     prompt = data.get('prompt')
 
@@ -17,8 +19,6 @@ def index():
         return jsonify({'error': 'Prompt is required'}), 400
     
     try:
-        prompt = request.form['prompt']
-
         #url = ImageGenerator.make_image(prompt)
         url = ImageGenerator.mock_openai_image_create(prompt)
 

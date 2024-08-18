@@ -83,6 +83,7 @@ export default function ScriptEditor({ toggleBlockType }) {
     const viewRef = useRef(null);
     const [scenes, setScenes] = useState([]);
     const [blockType, setBlockType] = useState('actionBlock');
+<<<<<<< HEAD
 
     const toggleBold = () => {
         const { state, dispatch } = viewRef.current;
@@ -102,6 +103,57 @@ export default function ScriptEditor({ toggleBlockType }) {
         wrapInList(schema.nodes.bullet_list)(state, dispatch);
     };
 
+=======
+    const [prompt, setPrompt] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
+    const [error, setError] = useState('');
+
+      const handleSubmit = async (e) => {
+
+          try {
+          const response = await fetch('http://localhost:5000/generate-image', {
+              method: 'POST',
+              headers: {
+              'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ prompt }),
+          });
+
+          const data = await response.json();
+          console.log(data);
+
+          if (response.ok) {
+              setImageUrl(data.image_url);
+              setError('');
+          } else {
+              setError(data.error || 'Something went wrong');
+              setImageUrl('');
+          }
+          } catch (err) {
+          setError('Network error: ' + err.message);
+          setImageUrl('');
+          }
+      };
+
+    const toggleBold = () => {
+        const { state, dispatch } = viewRef.current;
+        const { schema } = state;
+        toggleMark(schema.marks.bold)(state, dispatch);
+    };
+
+    const toggleItalic = () => {
+        const { state, dispatch } = viewRef.current;
+        const { schema } = state;
+        toggleMark(schema.marks.italic)(state, dispatch);
+    };
+
+    const toggleBulletList = () => {
+        const { state, dispatch } = viewRef.current;
+        const { schema } = state;
+        wrapInList(schema.nodes.bullet_list)(state, dispatch);
+    };
+
+>>>>>>> aiparts
     const toggleOrderedList = () => {
         const { state, dispatch } = viewRef.current;
         const { schema } = state;
@@ -180,10 +232,16 @@ export default function ScriptEditor({ toggleBlockType }) {
         if (!result.destination) return;
 
         const reorderedScenes = Array.from(scenes);
+        if (result.destination) {
+          setPrompt(scenes[result.destination.index]);
+          handleSubmit();
+        };
         const [removed] = reorderedScenes.splice(result.source.index, 1);
         reorderedScenes.splice(result.destination.index, 0, removed);
 
         setScenes(reorderedScenes);
+        
+        
 
         // Update the editor with the new scene order
         const tr = viewRef.current.state.tr;
@@ -216,6 +274,11 @@ export default function ScriptEditor({ toggleBlockType }) {
                 toggleOrderedList={toggleOrderedList}
             />
             <div className="editor-container" ref={editorRef}></div>
+<<<<<<< HEAD
+=======
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {imageUrl && <img src={imageUrl} alt="Generated" />}
+>>>>>>> aiparts
             <SceneList scenes={scenes} onDragEnd={handleDragEnd} />
         </div>
     );
@@ -247,5 +310,9 @@ function SceneList({ scenes, onDragEnd }) {
             </Droppable>
         </DragDropContext>
     );
+<<<<<<< HEAD
 }
 
+=======
+}
+>>>>>>> aiparts

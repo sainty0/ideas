@@ -1,30 +1,26 @@
-import React, { useState } from 'react';
-
-function Toolbar({ toggleBlockType, currentBlockType, toggleBold, toggleItalic, toggleBulletList, toggleOrderedList }) {
-  const [selectedBlockType, setSelectedBlockType] = useState(currentBlockType);
-
-  const handleBlockTypeChange = (event) => {
-    const newBlockType = event.target.value;
-    setSelectedBlockType(newBlockType);
-    toggleBlockType(newBlockType);
-  };
-
+function Toolbar({ toggleBlockType, currentBlockType }) {
   return (
     <div className="toolbar">
-      {/* Dropdown for block types */}
-      <select value={selectedBlockType} onChange={handleBlockTypeChange}>
-        <option value="sceneHeading">Scene Heading</option>
-        <option value="actionBlock">Action Block</option>
-        <option value="dialogue">Dialogue</option>
-      </select>
-      <button onClick={toggleBold}>Bold</button>
-      <button onClick={toggleItalic}>Italic</button>
-      <button onClick={toggleBulletList}>Bullet List</button>
-      <button onClick={toggleOrderedList}>Ordered List</button>
+      <button
+        className={currentBlockType === 'sceneHeading' ? 'active' : ''}
+        onClick={() => toggleBlockType('sceneHeading')}
+      >
+        Scene Heading
+      </button>
+      <button
+        className={currentBlockType === 'actionBlock' ? 'active' : ''}
+        onClick={() => toggleBlockType('actionBlock')}
+      >
+        Action Block
+      </button>
+      <button
+        className={currentBlockType === 'dialogue' ? 'active' : ''}
+        onClick={() => toggleBlockType('dialogue')}
+      >
+        Dialogue
+      </button>
     </div>
   );
 }
 
-
 export default Toolbar;
-
