@@ -1,0 +1,7 @@
+The use of openAI was used in the backend, this library utilizes AI to add to the project, and generate images relating to the scene discribed by the user.
+
+https://pypi.org/project/openai/
+
+https://platform.openai.com/docs/overview
+
+Documents on this AI can be found above.
