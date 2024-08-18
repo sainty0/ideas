@@ -258,6 +258,8 @@ export default function ScriptEditor({ toggleBlockType }) {
                 toggleOrderedList={toggleOrderedList}
             />
             <div className="editor-container" ref={editorRef}></div>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {imageUrl && <img src={imageUrl} alt="Generated" />}
             <SceneList scenes={scenes} onDragEnd={handleDragEnd} imageUrls={imageUrls} />
         </div>
     );
@@ -279,7 +281,8 @@ function SceneList({ scenes, onDragEnd, imageUrls }) {
                                         {...provided.dragHandleProps}
                                     >
                                         Scene {index + 1}
-                                        {imageUrls[index] && <img src={imageUrls[index]} alt="Generated" />}
+                                        
+                                        {/* {imageUrls[index] && <img src={imageUrls[index]} alt="Generated" />} */}
                                     </div>
                                 )}
                             </Draggable>

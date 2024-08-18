@@ -25,6 +25,7 @@ class ImageGenerator():
 
     def make_prompt(self, text):
         content = text['content']
+        print(content)
         create_word = self.deconstruct_all(content)
         prompt = "Can you create an image for a story board using the Scene described here: " + create_word
         return prompt
@@ -39,6 +40,7 @@ class ImageGenerator():
         )
 
         image_url = response['data'][0]['url']
+        print(image_url)
 
         return image_url
     

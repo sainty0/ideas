@@ -19,8 +19,8 @@ def generate_image():
         return jsonify({'error': 'Prompt is required'}), 400
     
     try:
-        #url = ImageGenerator.make_image(prompt)
-        url = ImageGenerator.mock_openai_image_create(prompt)
+        url = ImageGenerator.make_image(prompt)
+        #url = ImageGenerator.mock_openai_image_create(prompt)
 
         return jsonify({'image_url': url})
     
